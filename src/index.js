@@ -43,14 +43,16 @@ app.post('/users', (request, response) => {
       })
   }
 
-  users.push({ 
+  const newUser = { 
     id: uuidv4(),
     name, 
     username, 
     todos: []
-  });
+  };
 
-  return response.status(201).json({message: `o username ${username} foi cadastrado no sistema!`})
+  users.push(newUser);
+
+  return response.status(201).json(newUser)
 
 });
 
@@ -73,18 +75,17 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 
   const {title, deadline} = request.body;
 
-  user.todos.push({ 
+  const newTodo = { 
     id: uuidv4(),
     title,
     done: false, 
     deadline, 
     created_at: new Date()
-  })
+  };
 
-  return response.status(201).json({
-    message: "nova tarefa registrada",
-    data: user.todos
-  })
+  user.todos.push(newTodo)
+
+  return response.status(201).json(newTodo)
 
 });
 
@@ -102,13 +103,13 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const todo = user.todos.find( todo => todo.id === id );
 
   if(!todo){
-    return response.status(400).json({error: "tarefa nao encontrada no usuario informado!"});
+    return response.status(404).json({error: "tarefa nao encontrada no usuario informado!"});
   }
 
   todo.title = !title ? todo.title : title;
   todo.deadline = !deadline ? todo.deadline : deadline;
 
-  return response.json({message: "tarefa editada com sucesso!"});
+  return response.json(todo);
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
@@ -119,12 +120,12 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
   const todo = user.todos.find( todo => todo.id === id );
 
   if(!todo){
-    return response.status(400).json({error: "tarefa nao encontrada no usuario informado!"});
+    return response.status(404).json({error: "tarefa nao encontrada no usuario informado!"});
   }
 
   todo.done = true;
 
-  return response.json({message: "tarefa concluída!"});
+  return response.json(todo);
 
 });
 
@@ -137,12 +138,12 @@ app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
   const todo = user.todos.find( todo => todo.id === id );
 
   if(!todo){
-    return response.status(400).json({error: "tarefa nao encontrada no usuario informado!"});
+    return response.status(404).json({error: "tarefa nao encontrada no usuario informado!"});
   }
 
   user.todos.splice(todo, 1);
 
-  return response.status(200).json(user.todos);
+  return response.status(204).json(user.todos);
 
 });
 
